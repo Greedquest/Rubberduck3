@@ -14,8 +14,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3    
+    - uses: actions/checkout@v3
+    
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
     
     - name: Interactive build
       uses: ./.github/actions/build
@@ -25,11 +27,11 @@ jobs:
 
     - name: Create a zip archive
       run: |
-        Compress-Archive -Path ./publish/* -DestinationPath ./myapp.zip
+        Compress-Archive -Path ./publish/* -DestinationPath ./Rubberduck.zip
 
     - name: Create GitHub Release and upload artifacts
       uses: softprops/action-gh-release@v1
       with:
-        files: myapp.zip
+        files: Rubberduck.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
