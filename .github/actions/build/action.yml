@@ -1,0 +1,53 @@
+name: 'Checkout, Cache, and Build'
+description: 'Checkout, cache NuGet packages and build data, and build a .NET project using msbuild'
+
+inputs:
+  configuration:
+    description: 'Build configuration'
+    required: true
+    default: 'Release'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get current week
+      id: get_week
+      run: echo "::set-output name=week::$(date +'%Y-%U')"
+      shell: bash
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ steps.get_week.outputs.week }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Cache build data
+      uses: actions/cache@v2
+      with:
+        path: |
+          **/bin
+          **/obj
+        key: ${{ runner.os }}-build-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Restore NuGet packages
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          msbuild -t:restore --force
+        else
+          msbuild -t:restore
+        fi
+
+    - name: Build solution
+      run: msbuild -p:Configuration=${{ inputs.configuration }}
