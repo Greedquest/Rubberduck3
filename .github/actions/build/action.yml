@@ -10,7 +10,7 @@ inputs:
     description: 'Force restore NuGet packages'
     required: false
     default: false
-
+    
 runs:
   using: "composite"
   steps:
