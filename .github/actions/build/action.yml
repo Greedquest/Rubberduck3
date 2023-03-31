@@ -13,7 +13,7 @@ runs:
     - name: Get current week
       id: get_week
       run: echo "::set-output name=week::$(date +'%Y-%U')"
-      shell: bash
+      shell: pwsh
 
     - name: Cache NuGet packages
       uses: actions/cache@v2
@@ -45,6 +45,8 @@ runs:
         else
           msbuild -t:restore
         fi
+      shell: pwsh
 
     - name: Build solution
       run: msbuild -p:Configuration=${{ inputs.configuration }}
+      shell: pwsh
