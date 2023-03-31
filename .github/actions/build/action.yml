@@ -1,5 +1,5 @@
-name: 'Checkout, Cache, and Build'
-description: 'Checkout, cache NuGet packages and build data, and build a .NET project using msbuild'
+name: 'Cache, and Build'
+description: 'Cache NuGet packages and build data, and build a .NET project using msbuild'
 
 inputs:
   configuration:
@@ -10,9 +10,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
     - name: Get current week
       id: get_week
       run: echo "::set-output name=week::$(date +'%Y-%U')"
