@@ -37,20 +37,16 @@ runs:
         restore-keys: |
           ${{ runner.os }}-build-
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
-
     - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
         if (${{ inputs.force_restore }}) {
-          msbuild -t:restore --force
+          nuget restore --force
         } else {
-          msbuild -t:restore
+          nuget restore
         }
       shell: pwsh
 
     - name: Build solution
-      run: msbuild -p:Configuration=${{ inputs.configuration }}
+      run: msbuild -m -p:Configuration=${{ inputs.configuration }}
       shell: pwsh
