@@ -6,6 +6,10 @@ inputs:
     description: 'Build configuration'
     required: true
     default: 'Release'
+  force_restore:
+    description: 'Force restore NuGet packages'
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -16,7 +20,7 @@ runs:
       shell: pwsh
 
     - name: Cache NuGet packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ steps.get_week.outputs.week }}
@@ -24,7 +28,7 @@ runs:
           ${{ runner.os }}-nuget-
 
     - name: Cache build data
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           **/bin
@@ -40,11 +44,11 @@ runs:
 
     - name: Restore NuGet packages
       run: |
-        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+        if (${{ inputs.force_restore }}) {
           msbuild -t:restore --force
-        else
+        } else {
           msbuild -t:restore
-        fi
+        }
       shell: pwsh
 
     - name: Build solution
