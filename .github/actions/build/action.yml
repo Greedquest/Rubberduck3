@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Get current week
       id: get_week
-      run: echo "::set-output name=week::$(date +'%Y-%U')"
+      run: echo "{week}=$(date +'%Y-%U')" >> $GITHUB_OUTPUT
       shell: pwsh
 
     - name: Cache NuGet packages
