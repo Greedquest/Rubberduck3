@@ -14,7 +14,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout, Cache, and Build
+    - name: Checkout repository
+      uses: actions/checkout@v3    
+    
+    - name: Interactive build
       uses: ./.github/actions/build
 
     - name: Publish artifacts
