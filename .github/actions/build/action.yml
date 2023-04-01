@@ -1,25 +1,26 @@
-name: 'Checkout, Cache, and Build'
-description: 'Checkout, cache NuGet packages and build data, and build a .NET project using msbuild'
+name: 'Cache, and Build'
+description: 'Cache NuGet packages and build data, and build a .NET project using msbuild'
 
 inputs:
   configuration:
     description: 'Build configuration'
     required: true
     default: 'Release'
-
+  force_restore:
+    description: 'Force restore NuGet packages'
+    required: false
+    default: false
+    
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
     - name: Get current week
       id: get_week
-      run: echo "::set-output name=week::$(date +'%Y-%U')"
-      shell: bash
+      run: echo "{week}=$(date +'%Y-%U')" >> $GITHUB_OUTPUT
+      shell: pwsh
 
     - name: Cache NuGet packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ steps.get_week.outputs.week }}
@@ -27,7 +28,7 @@ runs:
           ${{ runner.os }}-nuget-
 
     - name: Cache build data
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           **/bin
@@ -36,18 +37,16 @@ runs:
         restore-keys: |
           ${{ runner.os }}-build-
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
-
     - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: |
-        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          msbuild -t:restore --force
-        else
-          msbuild -t:restore
-        fi
+        if (${{ inputs.force_restore }}) {
+          nuget restore --force
+        } else {
+          nuget restore
+        }
+      shell: pwsh
 
     - name: Build solution
-      run: msbuild -p:Configuration=${{ inputs.configuration }}
+      run: msbuild -m -p:Configuration=${{ inputs.configuration }}
+      shell: pwsh

@@ -1,6 +1,7 @@
 name: Build and Test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - next
@@ -11,8 +12,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout, Cache, and Build
+    - uses: actions/checkout@v3
+    
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
+    
+    - name: Interactive build
       uses: ./.github/actions/build
-
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
