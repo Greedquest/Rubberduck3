@@ -11,18 +11,27 @@ on:
       - '**.sln'
 
 jobs:
-  release:
+  init:
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
-    
-    - name: Interactive build
-      uses: ./.github/actions/build
 
+  build:
+    needs: init
+    uses: ./.github/workflows/incremental_build.yaml
+    with:
+      configuration: 'Release'
+      force_restore: false
+    secrets: inherit
+      
+  release:
+    runs-on: windows-latest
+    needs: build
+    steps:
     - name: Publish artifacts
       run: msbuild -t:Publish -p:Configuration=Release -p:PublishDir=./publish
 
