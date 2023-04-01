@@ -1,6 +1,4 @@
-# .github/workflows/cache_and_build.yml
-
-name: Cache and Build
+name: Incremental Build
 
 on:
   workflow_call:
