@@ -13,10 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1
-
+    
   build:
     needs: init
     uses: ./.github/workflows/incremental_build.yaml
