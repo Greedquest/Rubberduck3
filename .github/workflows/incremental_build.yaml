@@ -1,0 +1,56 @@
+# .github/workflows/cache_and_build.yml
+
+name: Cache and Build
+
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: true
+        type: string
+        default: 'Release'
+      force_restore:
+        description: 'Force restore NuGet packages'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  cache_and_build:
+    runs-on: windows-latest
+    steps:
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Cache build data
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/bin
+            **/obj
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Restore NuGet packages
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          if (${{ inputs.force_restore }}) {
+            nuget restore --force
+          } else {
+            nuget restore
+          }
+        shell: pwsh
+
+      - name: Build solution
+        run: msbuild -m -p:Configuration=${{ inputs.configuration }}
+        shell: pwsh
