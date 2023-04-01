@@ -28,7 +28,17 @@ jobs:
 
     - name: Create a zip archive
       run: |
-        Compress-Archive -Path ./publish/* -DestinationPath ./Rubberduck.zip
+        $source = Get-ChildItem -Path . -Include publish -Recurse -Directory
+        $destination = "./Rubberduck.zip"
+
+        $itemsToCompress = @()
+
+        foreach ($dir in $source) {
+          $itemsToCompress += Get-ChildItem -Path $dir.FullName -Recurse -File
+        }
+
+        Compress-Archive -Path $itemsToCompress -DestinationPath $destination
+      shell: pwsh
 
     - name: Create GitHub Release and upload artifacts
       uses: softprops/action-gh-release@v1
