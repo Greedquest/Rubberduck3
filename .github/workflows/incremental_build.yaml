@@ -18,10 +18,11 @@ jobs:
   cache_and_build:
     runs-on: windows-latest
     steps:
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1
+      - uses: actions/checkout@v3
+      
+      - uses: microsoft/setup-msbuild@v1
     
-      - name: Cache NuGet packages
+      - name: Cache or Pop NuGet packages
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -29,7 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Cache build data
+      - name: Cache or Pop build data
         uses: actions/cache@v3
         with:
           path: |
@@ -39,7 +40,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-
 
-      - name: Restore NuGet packages
+      - name: Restore or Get NuGet packages
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: |
           if (${{ inputs.force_restore }}) {
@@ -50,5 +51,5 @@ jobs:
         shell: pwsh
 
       - name: Build solution
-        run: msbuild -m -p:Configuration=${{ inputs.configuration }}
+        run: msbuild -m -p:Configuration=${{ inputs.configuration }} -verbosity:diagnostic
         shell: pwsh
