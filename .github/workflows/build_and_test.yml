@@ -2,20 +2,13 @@ name: Build and Test
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - next
-  pull_request:
+      - main
 
 jobs:
-  init:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    
   build:
-    needs: init
     uses: ./.github/workflows/incremental_build.yaml
     with:
       configuration: 'Release'
