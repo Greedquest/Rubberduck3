@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#
+# Hello World!
 # git-restore-mtime - Change mtime of files based on commit date of last change
 #
 #    Copyright (C) 2012 Rodrigo Silva (MestreLion) <linux@rodrigosilva.com>
