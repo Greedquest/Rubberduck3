@@ -94,5 +94,5 @@ jobs:
         if: env.IS_RELEASE
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: github.event.inputs.tag_name
-          files: "**/bin"
+          tag_name: ${{ github.event.inputs.tag_name }}
+          files: "**/bin/${{env.BUILD_CONFIGURATION}}/**/*"
