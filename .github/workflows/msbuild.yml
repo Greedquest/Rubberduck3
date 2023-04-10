@@ -71,7 +71,7 @@ jobs:
       - name: Restore or Get NuGet packages
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: |
-          if (${{!startsWith(github.ref, 'refs/tags/')}}) {
+          if (${{env.IS_RELEASE}}) {
             nuget restore ${{env.SOLUTION_FILE_PATH}} --force
           } else {
             nuget restore ${{env.SOLUTION_FILE_PATH}}
