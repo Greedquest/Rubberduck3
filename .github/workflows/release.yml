@@ -5,53 +5,33 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
+    tags:
+      - "v*.*.*"
 
 jobs:
-  init:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1
-
   build:
-    needs: init
     uses: ./.github/workflows/incremental_build.yaml
     with:
       configuration: 'Release'
       force_restore: false
     secrets: inherit
-      
+  
+  init:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
   release:
     runs-on: windows-latest
-    needs: build
+    needs: [build, init]
+    
     steps:
-    - name: Publish artifacts
-      run: msbuild -t:Publish -p:Configuration=Release -p:PublishDir=./publish
-
-    - name: Create a zip archive
-      run: |
-        $source = Get-ChildItem -Path . -Include publish -Recurse -Directory
-        $destination = "./Rubberduck.zip"
-
-        $itemsToCompress = @()
-
-        foreach ($dir in $source) {
-          $itemsToCompress += Get-ChildItem -Path $dir.FullName -Recurse -File
-        }
-
-        Compress-Archive -Path $itemsToCompress -DestinationPath $destination
-      shell: pwsh
-
+    
+    - name: Download a Build Artifact
+      id: download
+      uses: actions/download-artifact@v3
+    
     - name: Create GitHub Release and upload artifacts
       uses: softprops/action-gh-release@v1
       with:
-        files: Rubberduck.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        files: ${{steps.download.outputs.download-path}}
