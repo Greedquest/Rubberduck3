@@ -1,4 +1,4 @@
-name: Incremental Build
+name: Incremental Build and Upload
 
 on:
   workflow_call:
@@ -19,14 +19,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: microsoft/setup-msbuild@v1
-      - uses: actions/setup-python@v4
       
+      - uses: microsoft/setup-msbuild@v1
+      
+      - uses: actions/setup-python@v4
+
       - name: Overwrite File Modification timestamps
         run: python git-restore-mtime.py
-      
-      
-    
+
       - name: Cache or Pop NuGet packages
         uses: actions/cache@v3
         with:
@@ -53,8 +53,11 @@ jobs:
           } else {
             nuget restore
           }
-        shell: pwsh
 
       - name: Build solution
         run: msbuild -m -p:Configuration=${{ inputs.configuration }} -verbosity:diagnostic
-        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: "**/bin"
